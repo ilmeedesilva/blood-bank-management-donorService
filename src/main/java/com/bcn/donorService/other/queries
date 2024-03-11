@@ -1,0 +1,51 @@
+// DONOR DB
+Create database bcndonor
+
+use bcndonor;
+
+// Donor table
+DROP TABLE IF EXISTS donor;
+
+CREATE TABLE donor (
+    donor_nic VARCHAR(20) PRIMARY KEY,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    blood_type VARCHAR(5) NOT NULL,
+    birthday DATE NOT NULL,
+    street_no VARCHAR(20) NOT NULL,
+    street VARCHAR(100) NOT NULL,
+    city VARCHAR(50) NOT NULL,
+    contact_no BIGINT,
+    emergency_contact_no BIGINT,
+    weight FLOAT,
+    gender VARCHAR(10) ,
+    units FLOAT
+);
+
+INSERT INTO donor (donor_nic, first_name, last_name, blood_type, birthday, street_no, street, city, contact_no, emergency_contact_no, weight, gender, units)
+VALUES
+('123456789V', 'John', 'Doe', 'O+', '1990-05-15', '123', 'Main Street', 'Cityville', 1234567890, 9876543210, 70.5, 'Male', 1.5),
+('987654321V', 'Jane', 'Doe', 'A-', '1988-10-20', '456', 'Broadway', 'Townsville', 9876543210, 1234567890, 65.2, 'Female', 2.0);
+
+select * from donor;
+
+
+
+// Donation history table
+CREATE TABLE donation_history (
+    id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
+    donor_nic VARCHAR(20) NOT NULL,
+    donation_date DATE NOT NULL,
+    quantity FLOAT NOT NULL,
+    recipient_type VARCHAR(50),
+    recipient_id INT,
+    FOREIGN KEY (donor_nic) REFERENCES donor(donor_nic)
+);
+
+INSERT INTO donation_history (donor_nic, donation_date, quantity, recipient_type, recipient_id)
+VALUES ('123456789V', '2023-05-15', 400, 'Hospital', 12345),
+       ('987654321V', '2023-06-20', 300, 'Blood Bank', 67890),
+       ('987654321V', '2023-07-10', 500, 'Hospital', 23456),
+       ('123456789V', '2023-08-05', 200, 'Clinic', 78901);
+
+select * from donation_history;
