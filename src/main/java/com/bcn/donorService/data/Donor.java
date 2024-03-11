@@ -2,6 +2,7 @@ package com.bcn.donorService.data;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 import java.sql.Date;
@@ -10,6 +11,7 @@ import java.sql.Date;
 @Table(name = "donor")
 public class Donor {
 
+    @Id
     @Column(name = "donor_nic")
     private String donorNic;
 
@@ -35,10 +37,10 @@ public class Donor {
     private String city;
 
     @Column(name = "contact_no")
-    private int contactNo;
+    private Long contactNo;
 
     @Column(name = "emergency_contact_no")
-    private int emergencyContactNo;
+    private Long emergencyContactNo;
 
     @Column(name = "weight")
     private float weight;
@@ -113,19 +115,19 @@ public class Donor {
         this.city = city;
     }
 
-    public int getContactNo() {
+    public Long getContactNo() {
         return contactNo;
     }
 
-    public void setContactNo(int contactNo) {
+    public void setContactNo(Long contactNo) {
         this.contactNo = contactNo;
     }
 
-    public int getEmergencyContactNo() {
+    public Long getEmergencyContactNo() {
         return emergencyContactNo;
     }
 
-    public void setEmergencyContactNo(int emergencyContactNo) {
+    public void setEmergencyContactNo(Long emergencyContactNo) {
         this.emergencyContactNo = emergencyContactNo;
     }
 
