@@ -12,9 +12,12 @@ public class DonationHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @ManyToOne
-    @JoinColumn(name = "donor_nic", referencedColumnName = "donor_nic", insertable = false, updatable = false)
-    private Donor donor;
+    @Column(name = "donor_nic")
+    private String donorNic;
+
+//    @ManyToOne
+//    @JoinColumn(name = "donor_nic", referencedColumnName = "donor_nic", insertable = false, updatable = false)
+//    private Donor donor;
 
     @Column(name = "donation_date")
     private Date donationDate;
@@ -36,13 +39,20 @@ public class DonationHistory {
         this.id = id;
     }
 
-    public Donor getDonor() {
-        return donor;
+    public String getDonorNic() {
+        return donorNic;
     }
 
-    public void setDonor(Donor donor) {
-        this.donor = donor;
+    public void setDonorNic(String donorNic) {
+        this.donorNic = donorNic;
     }
+//    public Donor getDonor() {
+//        return donor;
+//    }
+//
+//    public void setDonor(Donor donor) {
+//        this.donor = donor;
+//    }
 
     public Date getDonationDate() {
         return donationDate;

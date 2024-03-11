@@ -1,9 +1,6 @@
 package com.bcn.donorService.data;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.sql.Date;
 
@@ -12,6 +9,7 @@ import java.sql.Date;
 public class Donor {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "donor_nic")
     private String donorNic;
 
