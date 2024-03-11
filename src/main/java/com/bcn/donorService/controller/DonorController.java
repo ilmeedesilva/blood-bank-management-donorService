@@ -22,10 +22,10 @@ public class DonorController {
         return donorService.getAllDonors();
     }
 
-    @GetMapping(path = "/donors", params = "donorNic")
-    public List<Donor> findDonorByNic(@RequestParam String donorNic){
-        return donorService.findDonorByNic(donorNic);
-    }
+//    @GetMapping(path = "/donors", params = "donorNic")
+//    public List<Donor> findDonorByNic(@RequestParam String donorNic){
+//        return donorService.findDonorByNic(donorNic);
+//    }
 
     @GetMapping(path = "/donors/{donorNic}")
     public Donor getDonorByNic(@PathVariable String donorNic){

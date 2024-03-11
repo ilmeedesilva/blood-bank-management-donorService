@@ -9,6 +9,6 @@ import java.util.List;
 @Repository
 public interface DonationHistoryRepository extends JpaRepository <DonationHistory, Integer> {
 
-    @Query("select dh from donation_history dh where dh.donor.donorNic=?1")
+    @Query("select dh from DonationHistory dh where dh.donorNic=?1")
     List<DonationHistory> findDonationByNic(String donorNic);
 }

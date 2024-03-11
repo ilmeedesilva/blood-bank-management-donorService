@@ -22,9 +22,9 @@ public class DonorService {
         return donorRepository.findAll();
     }
 
-    public List<Donor> findDonorByNic(String donorNic){
-        return donorRepository.findDonorByNic(donorNic);
-    }
+//    public List<Donor> findDonorByNic(String donorNic){
+//        return donorRepository.findDonorByNic(donorNic);
+//    }
 
     public Donor getDonorByNic(String donorNic){
         Optional<Donor> donor = donorRepository.findById(donorNic);
