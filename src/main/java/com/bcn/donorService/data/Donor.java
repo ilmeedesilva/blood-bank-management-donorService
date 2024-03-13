@@ -1,7 +1,6 @@
 package com.bcn.donorService.data;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.GenericGenerator;
 
 import java.sql.Date;
 

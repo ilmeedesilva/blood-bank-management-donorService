@@ -2,8 +2,6 @@ package com.bcn.donorService.controller;
 
 import com.bcn.donorService.data.DonationHistory;
 import com.bcn.donorService.data.DonationHistoryRespond;
-import com.bcn.donorService.data.Donor;
-import com.bcn.donorService.data.DonorRespond;
 import com.bcn.donorService.service.DonationHistoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
