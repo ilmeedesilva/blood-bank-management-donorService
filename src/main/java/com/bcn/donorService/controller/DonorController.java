@@ -1,6 +1,7 @@
 package com.bcn.donorService.controller;
 
 import com.bcn.donorService.data.Donor;
+import com.bcn.donorService.data.DonorRespond;
 import com.bcn.donorService.service.DonorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -32,13 +33,13 @@ public class DonorController {
         return donorService.getDonorByNic(donorNic);
     }
 
-    @PutMapping(path = "/donors/{donorNic}")
-    public Donor updateDonorByNic(@PathVariable String donorNic){
-        return donorService.updateDonorByNic(donorNic);
+    @PutMapping(path = "/donors")
+    public DonorRespond updateDonor(@RequestBody Donor donor){
+        return donorService.updateDonor(donor);
     }
 
     @DeleteMapping(path = "/donors/{donorNic}")
-    public boolean deleteDonorById(@PathVariable String donorNic){
+    public DonorRespond deleteDonorById(@PathVariable String donorNic){
         return donorService.deleteDonorById(donorNic);
     }
 }
