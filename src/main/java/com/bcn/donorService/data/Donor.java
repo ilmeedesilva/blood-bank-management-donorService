@@ -1,6 +1,7 @@
 package com.bcn.donorService.data;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.sql.Date;
 
@@ -9,7 +10,7 @@ import java.sql.Date;
 public class Donor {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+//    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "donor_nic")
     private String donorNic;
 

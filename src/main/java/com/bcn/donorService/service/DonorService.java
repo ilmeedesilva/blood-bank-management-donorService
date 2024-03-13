@@ -2,6 +2,7 @@ package com.bcn.donorService.service;
 
 import com.bcn.donorService.data.Donor;
 import com.bcn.donorService.data.DonorRepository;
+import com.bcn.donorService.data.DonorRespond;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,20 +35,27 @@ public class DonorService {
         return null;
     }
 
-    public Donor updateDonorByNic(String donorNic) {
-        Optional<Donor> donors = donorRepository.findById(donorNic);
+    public DonorRespond updateDonor(Donor donor) {
+        DonorRespond donorRespond = new DonorRespond();
+        Optional<Donor> donors = donorRepository.findById(donor.getDonorNic());
         if (donors.isPresent()) {
-            return donorRepository.save(donors.get());
+            donorRepository.save(donor);
+            donorRespond.setStatusMsg("Donor updated successfully");
+
         } else {
-            return null;
+            donorRespond.setStatusMsg("Donor update unsuccessful");
         }
+        return donorRespond;
     }
 
-    public boolean deleteDonorById(String donorNic) {
+    public DonorRespond deleteDonorById(String donorNic) {
+        DonorRespond donorRespond = new DonorRespond();
         if (donorRepository.existsById(donorNic)) {
             donorRepository.deleteById(donorNic);
-            return true;
+            donorRespond.setStatusMsg("Donor deleted successfully");
+            return donorRespond;
         }
-        return false;
+        donorRespond.setStatusMsg("Donor delete unsuccessful");
+        return donorRespond;
     }
 }
