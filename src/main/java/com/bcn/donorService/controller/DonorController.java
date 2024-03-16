@@ -9,13 +9,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:3000")
 public class DonorController {
 
     @Autowired
     private DonorService donorService;
 
     @PostMapping(path = "/donors")
-    public Donor createDonor(@RequestBody Donor donor){
+    public DonorRespond createDonor(@RequestBody Donor donor){
         return donorService.createDonor(donor);
     }
     @GetMapping(path = "/donors")
