@@ -4,6 +4,7 @@ import com.bcn.donorService.data.Donor;
 import com.bcn.donorService.data.DonorRepository;
 import com.bcn.donorService.data.DonorRespond;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
@@ -16,57 +17,73 @@ public class DonorService {
 
     public DonorRespond createDonor(Donor donor) {
         DonorRespond donorRespond = new DonorRespond();
-        Donor savedDonor = donorRepository.save(donor);
-        if (savedDonor != null) {
+        try {
+            donorRepository.save(donor);
             donorRespond.setStatusMsg("Donor created successfully");
             donorRespond.setStatus(200);
-        } else {
-            donorRespond.setStatusMsg("Failed to create donor");
+            return donorRespond;
+        } catch (DataIntegrityViolationException e) {
+//            throw new RuntimeException("Duplicate entry: " + e.getMessage());
+            donorRespond.setStatusMsg("Duplicate entry: " + e.getMessage());
+            donorRespond.setStatus(500);
+        } catch (Exception e) {
+//            throw new RuntimeException("Failed to create donor: " + e.getMessage());
+            donorRespond.setStatusMsg("Failed to create donor: " + e.getMessage());
             donorRespond.setStatus(500);
         }
         return donorRespond;
     }
 
-    public List<Donor> getAllDonors(){
-        return donorRepository.findAll();
+    public List<Donor> getAllDonors() {
+        try {
+            return donorRepository.findAll();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to fetch all donors: " + e.getMessage());
+        }
     }
 
 //    public List<Donor> findDonorByNic(String donorNic){
 //        return donorRepository.findDonorByNic(donorNic);
 //    }
 
-    public Donor getDonorByNic(String donorNic){
-        Optional<Donor> donor = donorRepository.findById(donorNic);
-        if(donor.isPresent()) {
-            return donor.get();
+    public Donor getDonorByNic(String donorNic) {
+        try {
+            Optional<Donor> donor = donorRepository.findById(donorNic);
+            return donor.orElse(null);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get donor by NIC: " + e.getMessage());
         }
-        return null;
     }
 
     public DonorRespond updateDonor(Donor donor) {
         DonorRespond donorRespond = new DonorRespond();
-        Optional<Donor> donors = donorRepository.findById(donor.getDonorNic());
-        if (donors.isPresent()) {
-            donorRepository.save(donor);
-            donorRespond.setStatusMsg("Donor updated successfully");
-            donorRespond.setStatus(200);
-        } else {
-            donorRespond.setStatusMsg("Donor update unsuccessful");
-            donorRespond.setStatus(500);
+        try {
+            Optional<Donor> donors = donorRepository.findById(donor.getDonorNic());
+            if (donors.isPresent()) {
+                donorRepository.save(donor);
+                donorRespond.setStatusMsg("Donor updated successfully");
+            } else {
+                donorRespond.setStatusMsg("Donor update unsuccessful");
+            }
+        } catch (Exception e) {
+            donorRespond.setStatusMsg("Failed to update donor: " + e.getMessage());
         }
         return donorRespond;
     }
 
     public DonorRespond deleteDonorById(String donorNic) {
         DonorRespond donorRespond = new DonorRespond();
-        if (donorRepository.existsById(donorNic)) {
-            donorRepository.deleteById(donorNic);
-            donorRespond.setStatusMsg("Donor deleted successfully");
-            donorRespond.setStatus(200);
-            return donorRespond;
+        try {
+            if (donorRepository.existsById(donorNic)) {
+                donorRepository.deleteById(donorNic);
+                donorRespond.setStatusMsg("Donor deleted successfully");
+            } else {
+                donorRespond.setStatusMsg("Donor does not exist");
+            }
+        } catch (Exception e) {
+            donorRespond.setStatusMsg("Failed to delete donor: " + e.getMessage());
         }
-        donorRespond.setStatusMsg("Donor delete unsuccessful");
-        donorRespond.setStatus(500);
         return donorRespond;
     }
+
 }
