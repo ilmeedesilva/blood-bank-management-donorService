@@ -14,8 +14,17 @@ public class DonorService {
     @Autowired
     private DonorRepository donorRepository;
 
-    public Donor createDonor(Donor donor){
-        return donorRepository.save(donor);
+    public DonorRespond createDonor(Donor donor) {
+        DonorRespond donorRespond = new DonorRespond();
+        Donor savedDonor = donorRepository.save(donor);
+        if (savedDonor != null) {
+            donorRespond.setStatusMsg("Donor created successfully");
+            donorRespond.setStatus(200);
+        } else {
+            donorRespond.setStatusMsg("Failed to create donor");
+            donorRespond.setStatus(500);
+        }
+        return donorRespond;
     }
 
     public List<Donor> getAllDonors(){
@@ -40,9 +49,10 @@ public class DonorService {
         if (donors.isPresent()) {
             donorRepository.save(donor);
             donorRespond.setStatusMsg("Donor updated successfully");
-
+            donorRespond.setStatus(200);
         } else {
             donorRespond.setStatusMsg("Donor update unsuccessful");
+            donorRespond.setStatus(500);
         }
         return donorRespond;
     }
@@ -52,9 +62,11 @@ public class DonorService {
         if (donorRepository.existsById(donorNic)) {
             donorRepository.deleteById(donorNic);
             donorRespond.setStatusMsg("Donor deleted successfully");
+            donorRespond.setStatus(200);
             return donorRespond;
         }
         donorRespond.setStatusMsg("Donor delete unsuccessful");
+        donorRespond.setStatus(500);
         return donorRespond;
     }
 }
