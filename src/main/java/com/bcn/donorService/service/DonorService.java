@@ -62,8 +62,10 @@ public class DonorService {
             if (donors.isPresent()) {
                 donorRepository.save(donor);
                 donorRespond.setStatusMsg("Donor updated successfully");
+                donorRespond.setStatus(200);
             } else {
                 donorRespond.setStatusMsg("Donor update unsuccessful");
+                donorRespond.setStatus(500);
             }
         } catch (Exception e) {
             donorRespond.setStatusMsg("Failed to update donor: " + e.getMessage());
@@ -77,11 +79,14 @@ public class DonorService {
             if (donorRepository.existsById(donorNic)) {
                 donorRepository.deleteById(donorNic);
                 donorRespond.setStatusMsg("Donor deleted successfully");
+                donorRespond.setStatus(200);
             } else {
                 donorRespond.setStatusMsg("Donor does not exist");
+                donorRespond.setStatus(500);
             }
         } catch (Exception e) {
             donorRespond.setStatusMsg("Failed to delete donor: " + e.getMessage());
+            donorRespond.setStatus(500);
         }
         return donorRespond;
     }
