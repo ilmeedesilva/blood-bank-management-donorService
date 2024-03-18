@@ -29,8 +29,8 @@ public class DonorController {
 //        return donorService.findDonorByNic(donorNic);
 //    }
 
-    @GetMapping(path = "/donors/{donorNic}")
-    public Donor getDonorByNic(@PathVariable String donorNic){
+    @GetMapping(path = "/donors", params = "donorNic")
+    public Donor getDonorByNic(@RequestParam String donorNic){
         return donorService.getDonorByNic(donorNic);
     }
 
