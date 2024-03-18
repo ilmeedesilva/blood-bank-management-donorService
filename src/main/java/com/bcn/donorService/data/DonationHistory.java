@@ -3,6 +3,7 @@ package com.bcn.donorService.data;
 import jakarta.persistence.*;
 
 import java.sql.Date;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "donation_history")
@@ -53,6 +54,7 @@ public class DonationHistory {
 //    public void setDonor(Donor donor) {
 //        this.donor = donor;
 //    }
+
 
     public Date getDonationDate() {
         return donationDate;

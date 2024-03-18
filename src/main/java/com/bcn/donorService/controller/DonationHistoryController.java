@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:3000")
 public class DonationHistoryController {
 
     @Autowired
@@ -16,6 +17,10 @@ public class DonationHistoryController {
 
     @PostMapping(path = "/donation-history")
     public DonationHistoryRespond createDonationHistory(@RequestBody DonationHistory donationHistory){
+        System.out.println("*********************************");
+        System.out.println("NIC - "+ donationHistory.getDonorNic());
+        System.out.println("Date - "+ donationHistory.getDonationDate());
+        System.out.println("Qty - "+ donationHistory.getQuantity());
         return donationHistoryService.createDonationHistory(donationHistory);
     }
 
