@@ -3,10 +3,16 @@ package com.bcn.donorService.controller;
 import com.bcn.donorService.data.Donor;
 import com.bcn.donorService.data.DonorRespond;
 import com.bcn.donorService.service.DonorService;
+import com.bcn.donorService.utils.TokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.UnsupportedEncodingException;
+import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
@@ -15,38 +21,45 @@ public class DonorController {
     @Autowired
     private DonorService donorService;
 
-    @PostMapping(path = "/donors")
-    public DonorRespond createDonor(@RequestBody Donor donor){
-        return donorService.createDonor(donor);
-    }
-    @GetMapping(path = "/donors")
-    public List<Donor> getAllDonors(){
-        return donorService.getAllDonors();
+    private Object authorizeAndGetResult(String token, Supplier<Object> operation) {
+        String role = TokenUtil.decryptTokenAndGetRole(token);
+        System.out.println("role - " + role);
+        if ("Admin".equals(role)) {
+            return operation.get();
+        } else {
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Unauthorized access");
+            return response;
+        }
     }
 
-//    @GetMapping(path = "/donors", params = "donorNic")
-//    public List<Donor> findDonorByNic(@RequestParam String donorNic){
-//        return donorService.findDonorByNic(donorNic);
-//    }
+    @PostMapping(path = "/donors")
+    public Object createDonor(@RequestBody Donor donor, @RequestHeader("Authorization") String token) {
+        return authorizeAndGetResult(token, () -> donorService.createDonor(donor));
+    }
+
+    @GetMapping(path = "/donors")
+    public Object getAllDonors(@RequestHeader("Authorization") String token) {
+        return authorizeAndGetResult(token, () -> donorService.getAllDonors());
+    }
 
     @GetMapping(path = "/donors", params = "donorNic")
-    public Donor getDonorByNic(@RequestParam String donorNic){
-        return donorService.getDonorByNic(donorNic);
+    public Object getDonorByNic(@RequestHeader("Authorization") String token, @RequestParam String donorNic) {
+        return authorizeAndGetResult(token, () -> donorService.getDonorByNic(donorNic));
     }
 
     @PutMapping(path = "/donors")
-    public DonorRespond updateDonor(@RequestBody Donor donor){
-        return donorService.updateDonor(donor);
+    public Object updateDonor(@RequestBody Donor donor, @RequestHeader("Authorization") String token) {
+        return authorizeAndGetResult(token, () -> donorService.updateDonor(donor));
     }
 
     @DeleteMapping(path = "/donors/{donorNic}")
-    public DonorRespond deleteDonorById(@PathVariable String donorNic){
-        return donorService.deleteDonorById(donorNic);
+    public Object deleteDonorById(@PathVariable String donorNic, @RequestHeader("Authorization") String token) {
+        return authorizeAndGetResult(token, () -> donorService.deleteDonorById(donorNic));
     }
 
     @GetMapping("donors/nic/{donorNic}")
-    public Donor getDonorsByNic(@PathVariable String donorNic){
-        System.out.println("in donor nic controller");
-        return donorService.findDonorByNic(donorNic);
+    public Object getDonorsByNic(@PathVariable String donorNic, @RequestHeader("Authorization") String token) {
+        return authorizeAndGetResult(token, () -> donorService.findDonorByNic(donorNic));
     }
 }
