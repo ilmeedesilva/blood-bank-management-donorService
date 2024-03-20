@@ -43,4 +43,10 @@ public class DonorController {
     public DonorRespond deleteDonorById(@PathVariable String donorNic){
         return donorService.deleteDonorById(donorNic);
     }
+
+    @GetMapping("donors/nic/{donorNic}")
+    public Donor getDonorsByNic(@PathVariable String donorNic){
+        System.out.println("in donor nic controller");
+        return donorService.findDonorByNic(donorNic);
+    }
 }
