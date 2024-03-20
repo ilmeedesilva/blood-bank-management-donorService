@@ -86,4 +86,21 @@ public class DonorService {
         return donorRespond;
     }
 
+    public Donor findDonorByNic(String donorNic){
+        System.out.println("in donor nic service");
+        try {
+            Optional<Donor> donor = donorRepository.findDonorByNic(donorNic);
+            System.out.println("donor - " + donor);
+            if(donor.isPresent()) {
+                return donor.get();
+            }
+            return null;
+        } catch (Exception e) {
+            System.out.println("Error finding donor by NIC: " + e.getMessage());
+            return null;
+        }
+
+    }
+
+
 }
