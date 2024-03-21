@@ -1,11 +1,14 @@
 package com.bcn.donorService.controller;
 
+import com.bcn.donorService.config.RestTemplateConfig;
 import com.bcn.donorService.data.Donor;
 import com.bcn.donorService.data.DonorRespond;
 import com.bcn.donorService.service.DonorService;
 import com.bcn.donorService.utils.TokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
@@ -21,6 +24,8 @@ public class DonorController {
     @Autowired
     private DonorService donorService;
 
+
+
     private Object authorizeAndGetResult(String token, Supplier<Object> operation) {
         String role = TokenUtil.decryptTokenAndGetRole(token);
         System.out.println("role - " + role);
@@ -35,7 +40,7 @@ public class DonorController {
 
     @PostMapping(path = "/donors")
     public Object createDonor(@RequestBody Donor donor, @RequestHeader("Authorization") String token) {
-        return authorizeAndGetResult(token, () -> donorService.createDonor(donor));
+        return authorizeAndGetResult(token, () -> donorService.createDonor(donor, token));
     }
 
     @GetMapping(path = "/donors")
@@ -62,4 +67,6 @@ public class DonorController {
     public Object getDonorsByNic(@PathVariable String donorNic, @RequestHeader("Authorization") String token) {
         return authorizeAndGetResult(token, () -> donorService.findDonorByNic(donorNic));
     }
+
+
 }
