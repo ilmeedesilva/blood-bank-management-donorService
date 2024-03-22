@@ -3,6 +3,7 @@ package com.bcn.donorService.service;
 import com.bcn.donorService.data.Donor;
 import com.bcn.donorService.data.DonorRepository;
 import com.bcn.donorService.data.DonorRespond;
+import com.bcn.donorService.utils.StockHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.*;
@@ -25,20 +26,19 @@ public class DonorService {
         this.restTemplate = restTemplate;
     }
 
-    public ResponseEntity<String> callStockService(String token, String stockData, HttpMethod method) {
+    public ResponseEntity<String> callStockService(String token, Donor donor, String pathParam, HttpMethod method) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<String> requestEntity = new HttpEntity<>(stockData, headers);
+        HttpEntity<Donor> requestEntity = new HttpEntity<>(donor, headers);
 
-        String stockUrl = "http://localhost:8083/bcn/stocks";
+        String stockUrl = "http://localhost:8083/bcn/stocks" + pathParam;
         try {
             return restTemplate.exchange(stockUrl, method, requestEntity, String.class);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error communicating with stock service");
         }
     }
-
 
     public DonorRespond createDonor(Donor donor, String token) {
         DonorRespond donorRespond = new DonorRespond();
@@ -47,13 +47,12 @@ public class DonorService {
             donorRespond.setStatusMsg("Donor created successfully");
             donorRespond.setStatus(200);
 
-            String stockData = "{\"donorId\": \"" + donor.getDonorNic() + "\", \"action\": \"add\"}";
-            ResponseEntity<String> stockResponse = callStockService(token, stockData, HttpMethod.PUT);
+            ResponseEntity<String> stockResponse = callStockService(token, donor, "/" + donor.getDonorNic(), HttpMethod.PUT);
             if (stockResponse.getStatusCode() != HttpStatus.OK) {
                 donorRespond.setStatusMsg("Failed to update stock: " + stockResponse.getBody());
                 donorRespond.setStatus(500);
             }
-
+            System.out.println("Stock updated with " + stockResponse);
             return donorRespond;
         } catch (DataIntegrityViolationException e) {
             donorRespond.setStatusMsg("Duplicate entry: " + e.getMessage());

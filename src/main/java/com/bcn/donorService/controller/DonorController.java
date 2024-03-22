@@ -25,7 +25,6 @@ public class DonorController {
     private DonorService donorService;
 
 
-
     private Object authorizeAndGetResult(String token, Supplier<Object> operation) {
         String role = TokenUtil.decryptTokenAndGetRole(token);
         System.out.println("role - " + role);
