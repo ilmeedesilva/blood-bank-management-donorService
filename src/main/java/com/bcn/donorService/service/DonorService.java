@@ -19,7 +19,6 @@ public class DonorService {
     @Autowired
     private DonorRepository donorRepository;
 
-
     private final RestTemplate restTemplate;
 
     public DonorService(RestTemplate restTemplate) {
@@ -36,7 +35,8 @@ public class DonorService {
         try {
             return restTemplate.exchange(stockUrl, method, requestEntity, String.class);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error communicating with stock service");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error communicating with stock service");
         }
     }
 
@@ -47,7 +47,8 @@ public class DonorService {
             donorRespond.setStatusMsg("Donor created successfully");
             donorRespond.setStatus(200);
 
-            ResponseEntity<String> stockResponse = callStockService(token, donor, "/" + donor.getDonorNic(), HttpMethod.PUT);
+            ResponseEntity<String> stockResponse = callStockService(token, donor, "/" + donor.getDonorNic(),
+                    HttpMethod.PUT);
             if (stockResponse.getStatusCode() != HttpStatus.OK) {
                 donorRespond.setStatusMsg("Failed to update stock: " + stockResponse.getBody());
                 donorRespond.setStatus(500);
@@ -64,7 +65,6 @@ public class DonorService {
         return donorRespond;
     }
 
-
     public List<Donor> getAllDonors() {
         try {
             return donorRepository.findAll();
@@ -73,9 +73,9 @@ public class DonorService {
         }
     }
 
-//    public List<Donor> findDonorByNic(String donorNic){
-//        return donorRepository.findDonorByNic(donorNic);
-//    }
+    // public List<Donor> findDonorByNic(String donorNic){
+    // return donorRepository.findDonorByNic(donorNic);
+    // }
 
     public Donor getDonorByNic(String donorNic) {
         try {
@@ -122,12 +122,12 @@ public class DonorService {
         return donorRespond;
     }
 
-    public Donor findDonorByNic(String donorNic){
+    public Donor findDonorByNic(String donorNic) {
         System.out.println("in donor nic service");
         try {
             Optional<Donor> donor = donorRepository.findDonorByNic(donorNic);
             System.out.println("donor - " + donor);
-            if(donor.isPresent()) {
+            if (donor.isPresent()) {
                 return donor.get();
             }
             return null;
@@ -137,6 +137,5 @@ public class DonorService {
         }
 
     }
-
 
 }

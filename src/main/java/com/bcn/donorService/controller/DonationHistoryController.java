@@ -31,6 +31,7 @@ public class DonationHistoryController {
 
     @GetMapping(path = "/donation-history/{donorNic}")
     public List<DonationHistory> findDonationByNic(@PathVariable String donorNic){
+        System.out.println("donorNic - "+ donorNic);
         return donationHistoryService.findDonationByNic(donorNic);
     }
 
