@@ -47,12 +47,12 @@ public class DonorService {
             donorRespond.setStatusMsg("Donor created successfully");
             donorRespond.setStatus(200);
 
-            String stockData = "{\"donorId\": \"" + donor.getDonorNic() + "\", \"action\": \"add\"}";
-            ResponseEntity<String> stockResponse = callStockService(token, stockData, HttpMethod.PUT);
-            if (stockResponse.getStatusCode() != HttpStatus.OK) {
-                donorRespond.setStatusMsg("Failed to update stock: " + stockResponse.getBody());
-                donorRespond.setStatus(500);
-            }
+//            String stockData = "{\"donorId\": \"" + donor.getDonorNic() + "\", \"action\": \"add\"}";
+//            ResponseEntity<String> stockResponse = callStockService(token, stockData, HttpMethod.PUT);
+//            if (stockResponse.getStatusCode() != HttpStatus.OK) {
+//                donorRespond.setStatusMsg("Failed to update stock: " + stockResponse.getBody());
+//                donorRespond.setStatus(500);
+//            }
 
             return donorRespond;
         } catch (DataIntegrityViolationException e) {
