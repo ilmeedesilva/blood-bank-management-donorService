@@ -9,12 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Supplier;
 
 @RestController
@@ -65,6 +66,13 @@ public class DonorController {
     @GetMapping("donors/nic/{donorNic}")
     public Object getDonorsByNic(@PathVariable String donorNic, @RequestHeader("Authorization") String token) {
         return authorizeAndGetResult(token, () -> donorService.findDonorByNic(donorNic));
+    }
+
+
+    @PostMapping(path = "/donors/csv")
+    public DonorRespond uploadCsvFile(@RequestParam("file") MultipartFile file, @RequestHeader("Authorization") String token) {
+         return donorService.createDonorFromCsv(file, token);
+
     }
 
 
