@@ -4,6 +4,7 @@ import com.bcn.donorService.data.DonationHistory;
 import com.bcn.donorService.data.DonationHistoryRespond;
 import com.bcn.donorService.service.DonationHistoryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -49,4 +50,12 @@ public class DonationHistoryController {
     public DonationHistoryRespond deleteDonationById(@PathVariable int id){
         return donationHistoryService.deleteDonationById(id);
     }
+
+    @DeleteMapping(path = "/donation-history")
+    public DonationHistoryRespond deleteDonationByNicAndDate(
+            @RequestParam String donorNic,
+            @RequestParam String donationDate) {
+        return donationHistoryService.deleteDonationByNicAndDate(donorNic, donationDate);
+    }
+
 }

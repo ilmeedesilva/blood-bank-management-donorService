@@ -27,4 +27,12 @@ public interface DonationHistoryRepository extends JpaRepository <DonationHistor
     @Transactional
     @Query("update DonationHistory dh set dh.donationDate=?1, dh.quantity=?2 where dh.donorNic=?3")
     void updateDonorByNic(Date donationDate, float quantity, String donorNic);
+
+
+    @Modifying
+    @Transactional
+    @Query("delete from DonationHistory dh where dh.donorNic=?1 and  dh.donationDate=?2")
+    void deleteDonationByNicAndDate(String donorNic, Date donationDate);
+    @Query("select dh from DonationHistory dh where dh.donorNic=?1 and dh.donationDate=?2")
+    List<DonationHistory> getDonationHistoryByDate(String donorNic, Date donationDate);
 }
