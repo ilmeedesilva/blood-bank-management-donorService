@@ -1,11 +1,12 @@
 package com.bcn.donorService.service;
 
 import com.bcn.donorService.data.*;
-import com.bcn.donorService.utils.DateComparison;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.sql.Date;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class DonationHistoryService {
@@ -24,8 +25,13 @@ public class DonationHistoryService {
         donHis.setDonationDate(donationHistory.getDonationDate());
         donHis.setQuantity(donationHistory.getQuantity());
 
+        List<DonationHistory> donationHistoriesList = getDonationsByDate(donationHistory.getDonorNic(), donationHistory.getDonationDate());
         System.out.println("DONOR HIS");
         System.out.println("donationHistory.getDonorNic() - " + donHis.getDonorNic());
+        System.out.println();
+        if(donationHistoriesList.isEmpty()){
+
+
         try {
             // System.out.println("DONOR RES - " +
             // donationHistoryRepository.findDonationHistoryByNic(donHis.getDonorNic()));
@@ -70,6 +76,11 @@ public class DonationHistoryService {
             return donationHistoryRespond;
         } catch (Exception e) {
             donationHistoryRespond.setStatusMsg("Failed to add donation: " + e.getMessage());
+            donationHistoryRespond.setStatus(500);
+        }
+        }
+        else{
+            donationHistoryRespond.setStatusMsg("Failed to add donation. donor has donation on this date");
             donationHistoryRespond.setStatus(500);
         }
         return donationHistoryRespond;
@@ -130,6 +141,29 @@ public class DonationHistoryService {
             donationHistoryRespond.setStatusMsg("Failed to delete donation: " + e.getMessage());
         }
         return donationHistoryRespond;
+    }
+
+    public  DonationHistoryRespond deleteDonationByNicAndDate(String donorNic, String donationDate){
+        DonationHistoryRespond donationHistoryRespond = new DonationHistoryRespond();
+        try{
+            Date sqlDate = Date.valueOf(donationDate);
+            donationHistoryRepository.deleteDonationByNicAndDate(donorNic, sqlDate);
+            donationHistoryRespond.setStatusMsg("Donation delete successful");
+            donationHistoryRespond.setStatus(200);
+
+        }catch (Exception e){
+            donationHistoryRespond.setStatusMsg("Donation delete unsuccessful: " + e.getMessage());
+            donationHistoryRespond.setStatus(200);
+        }
+            return donationHistoryRespond;
+    }
+
+    public List<DonationHistory> getDonationsByDate(String nic, Date DonationDate){
+        try{
+            return donationHistoryRepository.getDonationHistoryByDate(nic, DonationDate);
+        }catch (Exception e){
+            return null;
+        }
     }
 
 }
