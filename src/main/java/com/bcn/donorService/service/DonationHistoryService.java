@@ -2,6 +2,7 @@ package com.bcn.donorService.service;
 
 import com.bcn.donorService.data.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -14,11 +15,14 @@ public class DonationHistoryService {
     @Autowired
     private DonationHistoryRepository donationHistoryRepository;
 
+    @Autowired
+    private StockHandleService stockHandleService;
+
     public DonationHistory findLatestDonation(String donorNic) {
         return donationHistoryRepository.findLatestDonation(donorNic);
     }
 
-    public DonationHistoryRespond createDonationHistory(DonationHistory donationHistory) {
+    public DonationHistoryRespond createDonationHistory(DonationHistory donationHistory, String token) {
         DonationHistoryRespond donationHistoryRespond = new DonationHistoryRespond();
         DonationHistory donHis = new DonationHistory();
         donHis.setDonorNic(donationHistory.getDonorNic());
@@ -28,58 +32,66 @@ public class DonationHistoryService {
         List<DonationHistory> donationHistoriesList = getDonationsByDate(donationHistory.getDonorNic(), donationHistory.getDonationDate());
         System.out.println("DONOR HIS");
         System.out.println("donationHistory.getDonorNic() - " + donHis.getDonorNic());
+
         System.out.println();
-        if(donationHistoriesList.isEmpty()){
+        if (donationHistoriesList.isEmpty()) {
 
 
-        try {
-            // System.out.println("DONOR RES - " +
-            // donationHistoryRepository.findDonationHistoryByNic(donHis.getDonorNic()));
-            // Optional<DonationHistory> donationsHistory =
-            // donationHistoryRepository.findDonationHistoryByNic(donHis.getDonorNic());
-            // System.out.println("TRY TRY TRY");
-            // System.out.println("donationsHistory.isPresent() - "+
-            // donationsHistory.isPresent());
-            // if(donationsHistory.isPresent()){
-            //// List<DonationHistory> donations =
-            // donationHistoryRepository.findDonationByNic(donationHistory.getDonorNic());
-            // DonationHistory latestDonation =
-            // findLatestDonation(donationHistory.getDonorNic());
-            // System.out.println("latestDonation - " + latestDonation.getDonationDate());
-            ////
-            //// if(donations == null){
-            //// System.out.println("NIC not exist");
-            //// }
-            //
-            // String donationDate = donationHistory.getDonationDate().toString();
-            // String latestDate = latestDonation.getDonationDate().toString();
-            //
-            // if(DateComparison.isGapGreaterThanOrEqualToMonths(latestDate,donationDate,3
-            // )) {
-            // donationHistoryRepository.save(donHis);
-            // donationHistoryRespond.setStatusMsg("Donation added successfully");
-            // donationHistoryRespond.setStatus(200);
-            // }
-            // else {
-            // System.out.println("cannot donate 1");
-            // donationHistoryRespond.setStatusMsg("Failed to add donation"); // period
-            // below than 3 months from last donation
-            // donationHistoryRespond.setStatus(500);
-            // }
-            //
-            // } else {
-            System.out.println("ELSE");
-            donationHistoryRepository.save(donHis);
-            donationHistoryRespond.setStatusMsg("Donation added successfully");
-            donationHistoryRespond.setStatus(200);
-            // }
-            return donationHistoryRespond;
-        } catch (Exception e) {
-            donationHistoryRespond.setStatusMsg("Failed to add donation: " + e.getMessage());
-            donationHistoryRespond.setStatus(500);
-        }
-        }
-        else{
+            try {
+                // System.out.println("DONOR RES - " +
+                // donationHistoryRepository.findDonationHistoryByNic(donHis.getDonorNic()));
+                // Optional<DonationHistory> donationsHistory =
+                // donationHistoryRepository.findDonationHistoryByNic(donHis.getDonorNic());
+                // System.out.println("TRY TRY TRY");
+                // System.out.println("donationsHistory.isPresent() - "+
+                // donationsHistory.isPresent());
+                // if(donationsHistory.isPresent()){
+                //// List<DonationHistory> donations =
+                // donationHistoryRepository.findDonationByNic(donationHistory.getDonorNic());
+                // DonationHistory latestDonation =
+                // findLatestDonation(donationHistory.getDonorNic());
+                // System.out.println("latestDonation - " + latestDonation.getDonationDate());
+                ////
+                //// if(donations == null){
+                //// System.out.println("NIC not exist");
+                //// }
+                //
+                // String donationDate = donationHistory.getDonationDate().toString();
+                // String latestDate = latestDonation.getDonationDate().toString();
+                //
+                // if(DateComparison.isGapGreaterThanOrEqualToMonths(latestDate,donationDate,3
+                // )) {
+                // donationHistoryRepository.save(donHis);
+                // donationHistoryRespond.setStatusMsg("Donation added successfully");
+                // donationHistoryRespond.setStatus(200);
+                // }
+                // else {
+                // System.out.println("cannot donate 1");
+                // donationHistoryRespond.setStatusMsg("Failed to add donation"); // period
+                // below than 3 months from last donation
+                // donationHistoryRespond.setStatus(500);
+                // }
+                //
+                // } else {
+                System.out.println("ELSE");
+                donationHistoryRepository.save(donHis);
+                donationHistoryRespond.setStatusMsg("Donation added successfully");
+                donationHistoryRespond.setStatus(200);
+
+                if (donationHistory.getQuantity() > 0) {
+                    ResponseEntity<String> stockResponse = stockHandleService.CallStockService(token, donationHistory, "/" + donationHistory.getDonorNic(),
+                            HttpMethod.PUT);
+
+                    System.out.println("stock res :" + stockResponse);
+                }
+
+                // }
+                return donationHistoryRespond;
+            } catch (Exception e) {
+                donationHistoryRespond.setStatusMsg("Failed to add donation: " + e.getMessage());
+                donationHistoryRespond.setStatus(500);
+            }
+        } else {
             donationHistoryRespond.setStatusMsg("Failed to add donation. donor has donation on this date");
             donationHistoryRespond.setStatus(500);
         }
@@ -106,23 +118,36 @@ public class DonationHistoryService {
 
     public DonationHistoryRespond updateDonationHistory(DonationHistory donationHistory) {
         DonationHistoryRespond donationHistoryRespond = new DonationHistoryRespond();
-        try {
+        List<DonationHistory> donationHistoriesList = getDonationsByDate(donationHistory.getDonorNic(), donationHistory.getDonationDate());
 
-            // DonationHistory donationHistory1 = new DonationHistory();
-            // donationHistory1.setDonationDate(donationHistory.getDonationDate());
-            // donationHistory1.setQuantity(donationHistory.getQuantity());
-            // donationHistory1.setDonorNic(donationHistory.getDonorNic());
-            if (donationHistoryRepository.existsById(donationHistory.getId())) {
-                donationHistoryRepository.save(donationHistory);
-                donationHistoryRespond.setStatusMsg("Donation updated successfully");
-                donationHistoryRespond.setStatus(200);
-            } else {
-                donationHistoryRespond.setStatusMsg("Donation update unsuccessful");
+//        System.out.println("donor date :" + donationHistory.getDonationDate());
+//        System.out.println("donor id :" + donationHistory.getId());
+//        System.out.println("List id: " + donationHistoriesList.get(0).getId());
+//        System.out.println("donor history size :" + donationHistoriesList.size());
+
+
+        if (donationHistoriesList.isEmpty() || donationHistoriesList.size() == 1 && donationHistoriesList.get(0).getId() == donationHistory.getId()) {
+            try {
+
+                // DonationHistory donationHistory1 = new DonationHistory();
+                // donationHistory1.setDonationDate(donationHistory.getDonationDate());
+                // donationHistory1.setQuantity(donationHistory.getQuantity());
+                // donationHistory1.setDonorNic(donationHistory.getDonorNic());
+                if (donationHistoryRepository.existsById(donationHistory.getId())) {
+                    donationHistoryRepository.save(donationHistory);
+                    donationHistoryRespond.setStatusMsg("Donation updated successfully");
+                    donationHistoryRespond.setStatus(200);
+                } else {
+                    donationHistoryRespond.setStatusMsg("Donation update unsuccessful");
+                    donationHistoryRespond.setStatus(500);
+                }
+
+            } catch (Exception e) {
+                donationHistoryRespond.setStatusMsg("Failed to update donation: " + e.getMessage());
                 donationHistoryRespond.setStatus(500);
             }
-
-        } catch (Exception e) {
-            donationHistoryRespond.setStatusMsg("Failed to update donation: " + e.getMessage());
+        } else {
+            donationHistoryRespond.setStatusMsg("Donor has a donation on this date");
             donationHistoryRespond.setStatus(500);
         }
         return donationHistoryRespond;
@@ -143,25 +168,25 @@ public class DonationHistoryService {
         return donationHistoryRespond;
     }
 
-    public  DonationHistoryRespond deleteDonationByNicAndDate(String donorNic, String donationDate){
+    public DonationHistoryRespond deleteDonationByNicAndDate(String donorNic, String donationDate) {
         DonationHistoryRespond donationHistoryRespond = new DonationHistoryRespond();
-        try{
+        try {
             Date sqlDate = Date.valueOf(donationDate);
             donationHistoryRepository.deleteDonationByNicAndDate(donorNic, sqlDate);
             donationHistoryRespond.setStatusMsg("Donation delete successful");
             donationHistoryRespond.setStatus(200);
 
-        }catch (Exception e){
+        } catch (Exception e) {
             donationHistoryRespond.setStatusMsg("Donation delete unsuccessful: " + e.getMessage());
             donationHistoryRespond.setStatus(200);
         }
-            return donationHistoryRespond;
+        return donationHistoryRespond;
     }
 
-    public List<DonationHistory> getDonationsByDate(String nic, Date DonationDate){
-        try{
+    public List<DonationHistory> getDonationsByDate(String nic, Date DonationDate) {
+        try {
             return donationHistoryRepository.getDonationHistoryByDate(nic, DonationDate);
-        }catch (Exception e){
+        } catch (Exception e) {
             return null;
         }
     }
