@@ -18,6 +18,9 @@ public class DonationHistoryService {
     @Autowired
     private StockHandleService stockHandleService;
 
+    @Autowired
+    private DonorService donorService;
+
     public DonationHistory findLatestDonation(String donorNic) {
         return donationHistoryRepository.findLatestDonation(donorNic);
     }
@@ -78,12 +81,7 @@ public class DonationHistoryService {
                 donationHistoryRespond.setStatusMsg("Donation added successfully");
                 donationHistoryRespond.setStatus(200);
 
-                if (donationHistory.getQuantity() > 0) {
-                    ResponseEntity<String> stockResponse = stockHandleService.CallStockService(token, donationHistory, "/" + donationHistory.getDonorNic(),
-                            HttpMethod.PUT);
-
-                    System.out.println("stock res :" + stockResponse);
-                }
+                SendDonationToStock(donHis, token);
 
                 // }
                 return donationHistoryRespond;
@@ -116,7 +114,7 @@ public class DonationHistoryService {
         }
     }
 
-    public DonationHistoryRespond updateDonationHistory(DonationHistory donationHistory) {
+    public DonationHistoryRespond updateDonationHistory(DonationHistory donationHistory, String token) {
         DonationHistoryRespond donationHistoryRespond = new DonationHistoryRespond();
         List<DonationHistory> donationHistoriesList = getDonationsByDate(donationHistory.getDonorNic(), donationHistory.getDonationDate());
 
@@ -125,7 +123,7 @@ public class DonationHistoryService {
 //        System.out.println("List id: " + donationHistoriesList.get(0).getId());
 //        System.out.println("donor history size :" + donationHistoriesList.size());
 
-
+        System.out.println("update donation token - " + token);
         if (donationHistoriesList.isEmpty() || donationHistoriesList.size() == 1 && donationHistoriesList.get(0).getId() == donationHistory.getId()) {
             try {
 
@@ -181,6 +179,40 @@ public class DonationHistoryService {
             donationHistoryRespond.setStatus(200);
         }
         return donationHistoryRespond;
+    }
+
+    public boolean IsStockExist(String token) {
+        try{
+            ResponseEntity<String> stockResponse = stockHandleService.GetDataFromStockService("/", token);
+            return stockResponse != null;
+        }catch (Exception e){
+            System.out.println("an error in is stock exist check method: " + e.getMessage());
+            return  false;
+        }
+
+    }
+
+    public void SendDonationToStock(DonationHistory Historydata, String token) {
+        Donor selectedDonor = new Donor();
+        selectedDonor = donorService.getDonorByNic(Historydata.getDonorNic());
+
+
+        if (selectedDonor != null) {
+
+            System.out.println("selected donor blood type - " + selectedDonor.getBloodType());
+            Stock stockItem = new Stock();
+            stockItem.setDonorNic(Historydata.getDonorNic());
+            stockItem.setDonationDate(Historydata.getDonationDate());
+            stockItem.setQuantity(Historydata.getQuantity());
+            stockItem.setBloodType(selectedDonor.getBloodType());
+
+            if (Historydata.getQuantity() > 0) {
+                ResponseEntity<String> stockResponse = stockHandleService.CallStockService(token, stockItem, "/" + Historydata.getDonorNic(),
+                        HttpMethod.PUT);
+
+                System.out.println("stock res :" + stockResponse);
+            }
+        }
     }
 
     public List<DonationHistory> getDonationsByDate(String nic, Date DonationDate) {
