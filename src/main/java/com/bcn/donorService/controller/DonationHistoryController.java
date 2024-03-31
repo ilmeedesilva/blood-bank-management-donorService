@@ -42,8 +42,8 @@ public class DonationHistoryController {
     }
 
     @PutMapping(path = "/donation-history")
-    public DonationHistoryRespond updateDonationHistory(@RequestBody DonationHistory donationHistory) {
-        return donationHistoryService.updateDonationHistory(donationHistory);
+    public DonationHistoryRespond updateDonationHistory(@RequestBody DonationHistory donationHistory, @RequestHeader("Authorization") String token) {
+        return donationHistoryService.updateDonationHistory(donationHistory, token);
     }
 
     @DeleteMapping(path = "/donation-history/{id}")
