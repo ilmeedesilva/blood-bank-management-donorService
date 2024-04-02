@@ -1,10 +1,15 @@
 package com.bcn.donorService.service;
 
 import com.bcn.donorService.data.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.sql.Date;
 import java.util.List;
@@ -81,7 +86,17 @@ public class DonationHistoryService {
                 donationHistoryRespond.setStatusMsg("Donation added successfully");
                 donationHistoryRespond.setStatus(200);
 
-                SendDonationToStock(donHis, token);
+                System.out.println(isStockExist(donHis.getDonationDate(), token));
+                if(isStockExist(donHis.getDonationDate(), token)){
+                    System.out.println("stock exist");
+                    //put request
+                    SendDonationToStock(donHis, token, HttpMethod.PUT);
+                }else{
+                    //post request
+                    System.out.println("stock does not exist");
+                    SendDonationToStock(donHis, token, HttpMethod.POST);
+                }
+
 
                 // }
                 return donationHistoryRespond;
@@ -181,18 +196,27 @@ public class DonationHistoryService {
         return donationHistoryRespond;
     }
 
-    public boolean IsStockExist(String token) {
-        try{
-            ResponseEntity<String> stockResponse = stockHandleService.GetDataFromStockService("/", token);
-            return stockResponse != null;
-        }catch (Exception e){
+    public boolean isStockExist(Date date, String token) {
+        try {
+            ResponseEntity<String> stockResponse = stockHandleService.GetDataFromStockService("/stock-items/" + date, token);
+            System.out.println("stockResponse - " + stockResponse);
+
+            if (stockResponse.getStatusCode() == HttpStatus.OK) {
+                JSONArray jsonArray = new JSONArray(stockResponse.getBody());
+
+                if (!jsonArray.isEmpty()) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
             System.out.println("an error in is stock exist check method: " + e.getMessage());
-            return  false;
         }
 
+        return false;
     }
 
-    public void SendDonationToStock(DonationHistory Historydata, String token) {
+
+    public void SendDonationToStock(DonationHistory Historydata, String token, HttpMethod method) {
         Donor selectedDonor = new Donor();
         selectedDonor = donorService.getDonorByNic(Historydata.getDonorNic());
 
@@ -207,8 +231,14 @@ public class DonationHistoryService {
             stockItem.setBloodType(selectedDonor.getBloodType());
 
             if (Historydata.getQuantity() > 0) {
-                ResponseEntity<String> stockResponse = stockHandleService.CallStockService(token, stockItem, "/" + Historydata.getDonorNic(),
-                        HttpMethod.PUT);
+                ResponseEntity<String> stockResponse = null;
+                if(method == HttpMethod.PUT){
+                    System.out.println("sending put request to stock");
+                    stockResponse  = stockHandleService.PutDataToStockService(token, stockItem, "/stock-items/");
+                }else if(method == HttpMethod.POST){
+                    System.out.println("sending post request to stock");
+                    stockResponse = stockHandleService.PostDataToStockService(token, stockItem, "/stock-items/");
+                }
 
                 System.out.println("stock res :" + stockResponse);
             }
