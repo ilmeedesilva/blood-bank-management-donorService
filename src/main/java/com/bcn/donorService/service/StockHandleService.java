@@ -70,7 +70,7 @@ public class StockHandleService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<Stock> requestEntity = new HttpEntity<>(stockDonorItem, headers);
 
-        String stockUrl = "http://localhost:8083/bcn/" + pathParam;
+        String stockUrl = "http://localhost:8083/bcn/stock-items";
         try {
             return restTemplate.exchange(stockUrl, HttpMethod.PUT, requestEntity, String.class);
         } catch (Exception e) {
