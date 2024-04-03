@@ -30,22 +30,6 @@ public class StockHandleService {
         }
     }
 
-    public ResponseEntity<String> PostDataToStockService(String token, Stock stockDonorItem, String pathParam){
-        System.out.println("PostDataToStockService");
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(token);
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<Stock> requestEntity = new HttpEntity<>(stockDonorItem, headers);
-
-//        String stockUrl = "http://localhost:8083/bcn" + pathParam;
-        String stockUrl = "http://localhost:8083/bcn/stock-items";
-        try {
-            return restTemplate.exchange(stockUrl, HttpMethod.POST, requestEntity, String.class);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error communicating with stock service");
-        }
-    }
 
     public ResponseEntity<String> GetDataFromStockService(String pathParam, String token){
         System.out.println("got data: " + pathParam);
@@ -63,6 +47,23 @@ public class StockHandleService {
         }
     }
 
+
+    public ResponseEntity<String> PostDataToStockService(String token, Stock stockDonorItem, String pathParam){
+        System.out.println("PostDataToStockService");
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Stock> requestEntity = new HttpEntity<>(stockDonorItem, headers);
+
+//        String stockUrl = "http://localhost:8083/bcn" + pathParam;
+        String stockUrl = "http://localhost:8083/bcn/stock-items";
+        try {
+            return restTemplate.exchange(stockUrl, HttpMethod.POST, requestEntity, String.class);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error communicating with stock service");
+        }
+    }
 
     public ResponseEntity<String> PutDataToStockService(String token, Stock stockDonorItem, String pathParam){
         HttpHeaders headers = new HttpHeaders();
