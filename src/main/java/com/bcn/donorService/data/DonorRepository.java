@@ -11,9 +11,12 @@ import java.util.Optional;
 @Repository
 public interface DonorRepository extends JpaRepository<Donor, String> {
 
-//    @Query("select d from Donor d where d.donorNic=?1")
-//    List<Donor> findDonorByNic(String donorNic);
+    // @Query("select d from Donor d where d.donorNic=?1")
+    // List<Donor> findDonorByNic(String donorNic);
 
     @Query("select d from Donor d where d.donorNic =?1")
     Optional<Donor> findDonorByNic(@Param("donorNic") String donorNic);
+
+    @Query("select d from Donor d where d.bloodType =?1")
+    List<Donor> getDonorsByBloodType(String bloodType);
 }

@@ -12,6 +12,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -37,13 +38,13 @@ public class DonationHistoryService {
         donHis.setDonationDate(donationHistory.getDonationDate());
         donHis.setQuantity(donationHistory.getQuantity());
 
-        List<DonationHistory> donationHistoriesList = getDonationsByDate(donationHistory.getDonorNic(), donationHistory.getDonationDate());
+        List<DonationHistory> donationHistoriesList = getDonationsByNicAndDate(donationHistory.getDonorNic(),
+                donationHistory.getDonationDate());
         System.out.println("DONOR HIS");
         System.out.println("donationHistory.getDonorNic() - " + donHis.getDonorNic());
 
         System.out.println();
         if (donationHistoriesList.isEmpty()) {
-
 
             try {
                 // System.out.println("DONOR RES - " +
@@ -87,16 +88,15 @@ public class DonationHistoryService {
                 donationHistoryRespond.setStatus(200);
 
                 System.out.println(isStockExist(donHis.getDonationDate(), token));
-                if(isStockExist(donHis.getDonationDate(), token)){
+                if (isStockExist(donHis.getDonationDate(), token)) {
                     System.out.println("stock exist");
-                    //put request
+                    // put request
                     SendDonationToStock(donHis, token, HttpMethod.PUT);
-                }else{
-                    //post request
+                } else {
+                    // post request
                     System.out.println("stock does not exist");
                     SendDonationToStock(donHis, token, HttpMethod.POST);
                 }
-
 
                 // }
                 return donationHistoryRespond;
@@ -131,25 +131,65 @@ public class DonationHistoryService {
 
     public DonationHistoryRespond updateDonationHistory(DonationHistory donationHistory, String token) {
         DonationHistoryRespond donationHistoryRespond = new DonationHistoryRespond();
-        List<DonationHistory> donationHistoriesList = getDonationsByDate(donationHistory.getDonorNic(), donationHistory.getDonationDate());
+        List<DonationHistory> donationHistoriesListByID = getDonationsById(donationHistory.getId());
+        List<DonationHistory> donationHistoriesList = getDonationsByNicAndDate(donationHistory.getDonorNic(),
+                donationHistory.getDonationDate());
 
-//        System.out.println("donor date :" + donationHistory.getDonationDate());
-//        System.out.println("donor id :" + donationHistory.getId());
-//        System.out.println("List id: " + donationHistoriesList.get(0).getId());
-//        System.out.println("donor history size :" + donationHistoriesList.size());
+        // System.out.println("donor date :" + donationHistory.getDonationDate());
+        // System.out.println("donor id :" + donationHistory.getId());
+        // System.out.println("List id: " + donationHistoriesList.get(0).getId());
+        // System.out.println("donor history size :" + donationHistoriesList.size());
 
         System.out.println("update donation token - " + token);
-        if (donationHistoriesList.isEmpty() || donationHistoriesList.size() == 1 && donationHistoriesList.get(0).getId() == donationHistory.getId()) {
+        if (donationHistoriesList.isEmpty() || donationHistoriesList.size() == 1
+                && donationHistoriesList.get(0).getId() == donationHistory.getId()) {
             try {
 
                 // DonationHistory donationHistory1 = new DonationHistory();
                 // donationHistory1.setDonationDate(donationHistory.getDonationDate());
                 // donationHistory1.setQuantity(donationHistory.getQuantity());
                 // donationHistory1.setDonorNic(donationHistory.getDonorNic());
+
+                Date dateBeforeUpdate = donationHistoriesListByID.get(0).getDonationDate();
+                Date updatedDate = donationHistory.getDonationDate();
+                String bloodType = donorService.getDonorByNic(donationHistory.getDonorNic()).getBloodType();
+
+                boolean areDatesAreSame = dateBeforeUpdate.toLocalDate().equals(updatedDate.toLocalDate());
+
                 if (donationHistoryRepository.existsById(donationHistory.getId())) {
                     donationHistoryRepository.save(donationHistory);
                     donationHistoryRespond.setStatusMsg("Donation updated successfully");
                     donationHistoryRespond.setStatus(200);
+
+
+//                    DonationHistory updatedDonations = new DonationHistory();
+                    if (areDatesAreSame) {
+//                        List<Donor> donorsWithSameBloodType = donorService.getDonorsByBloodType(bloodType);
+//                        List<DonationHistory> donorHistoryForBloodType = new ArrayList<>();
+//                        System.out.println(
+//                                "total donor count for bloodtype " + bloodType + ": " + donorsWithSameBloodType.size());
+//                        float totalQty = 0.0f;
+//                        for (Donor eachDonor : donorsWithSameBloodType) {
+//                            List<DonationHistory> donations = getDonationsByNicAndDate(eachDonor.getDonorNic(),
+//                                    updatedDate);
+//                            donorHistoryForBloodType.addAll(donations);
+//                        }
+//                        for (DonationHistory eachHistory : donorHistoryForBloodType) {
+//                            System.out.println("each qty = " + eachHistory.getQuantity());
+//                            totalQty += eachHistory.getQuantity();
+//                        }
+//                        System.out.println("total qty of the blood type " + bloodType + ": " + totalQty);
+//                        updatedDonations.setDonationDate(updatedDate);
+//                        updatedDonations.setDonorNic(donationHistory.getDonorNic());
+//                        updatedDonations.setQuantity(totalQty);
+//                        SendDonationToStock(updatedDonations, token, HttpMethod.PUT);
+
+                        HandleUpdateDonationToStock(donationHistory.getDonorNic(), token, updatedDate, bloodType);
+                    } else {
+                        // donation history with updated date
+                        HandleUpdateDonationToStock(donationHistory.getDonorNic(), token, dateBeforeUpdate, bloodType);
+                        HandleUpdateDonationToStock(donationHistory.getDonorNic(), token, updatedDate, bloodType);
+                    }
                 } else {
                     donationHistoryRespond.setStatusMsg("Donation update unsuccessful");
                     donationHistoryRespond.setStatus(500);
@@ -198,7 +238,8 @@ public class DonationHistoryService {
 
     public boolean isStockExist(Date date, String token) {
         try {
-            ResponseEntity<String> stockResponse = stockHandleService.GetDataFromStockService("/stock-items/" + date, token);
+            ResponseEntity<String> stockResponse = stockHandleService.GetDataFromStockService("/stock-items/" + date,
+                    token);
             System.out.println("stockResponse - " + stockResponse);
 
             if (stockResponse.getStatusCode() == HttpStatus.OK) {
@@ -215,11 +256,32 @@ public class DonationHistoryService {
         return false;
     }
 
+    public void HandleUpdateDonationToStock(String nic, String token, Date targetDate, String bloodType){
+        DonationHistory updatedDonations = new DonationHistory();
+        List<Donor> donorsWithSameBloodType = donorService.getDonorsByBloodType(bloodType);
+        List<DonationHistory> donorHistoryForBloodType = new ArrayList<>();
+        System.out.println(
+                "total donor count for bloodtype " + bloodType + ": " + donorsWithSameBloodType.size());
+        float totalQty = 0.0f;
+        for (Donor eachDonor : donorsWithSameBloodType) {
+            List<DonationHistory> donations = getDonationsByNicAndDate(eachDonor.getDonorNic(),
+                    targetDate);
+            donorHistoryForBloodType.addAll(donations);
+        }
+        for (DonationHistory eachHistory : donorHistoryForBloodType) {
+            System.out.println("each qty = " + eachHistory.getQuantity());
+            totalQty += eachHistory.getQuantity();
+        }
+        System.out.println("total qty of the blood type " + bloodType + ": " + totalQty);
+        updatedDonations.setDonationDate(targetDate);
+        updatedDonations.setDonorNic(nic);
+        updatedDonations.setQuantity(totalQty);
+        SendDonationToStock(updatedDonations, token, HttpMethod.PUT);
+    }
 
     public void SendDonationToStock(DonationHistory Historydata, String token, HttpMethod method) {
         Donor selectedDonor = new Donor();
         selectedDonor = donorService.getDonorByNic(Historydata.getDonorNic());
-
 
         if (selectedDonor != null) {
 
@@ -232,10 +294,10 @@ public class DonationHistoryService {
 
             if (Historydata.getQuantity() > 0) {
                 ResponseEntity<String> stockResponse = null;
-                if(method == HttpMethod.PUT){
+                if (method == HttpMethod.PUT) {
                     System.out.println("sending put request to stock");
-                    stockResponse  = stockHandleService.PutDataToStockService(token, stockItem, "/stock-items/");
-                }else if(method == HttpMethod.POST){
+                    stockResponse = stockHandleService.PutDataToStockService(token, stockItem, "/stock-items/");
+                } else if (method == HttpMethod.POST) {
                     System.out.println("sending post request to stock");
                     stockResponse = stockHandleService.PostDataToStockService(token, stockItem, "/stock-items/");
                 }
@@ -245,12 +307,28 @@ public class DonationHistoryService {
         }
     }
 
-    public List<DonationHistory> getDonationsByDate(String nic, Date DonationDate) {
+    public List<DonationHistory> getDonationsByNicAndDate(String nic, Date DonationDate) {
         try {
-            return donationHistoryRepository.getDonationHistoryByDate(nic, DonationDate);
+            return donationHistoryRepository.getDonationHistoryByNicAndDate(nic, DonationDate);
         } catch (Exception e) {
             return null;
         }
     }
+
+    public List<DonationHistory> getDonationsById(int id) {
+        try {
+            return donationHistoryRepository.getDonationHistoryById(id);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // public List<DonationHistory> getDonationsByDate(Date donationDate) {
+    // try {
+    // return donationHistoryRepository.getDonationHistoryByDate(donationDate);
+    // } catch (Exception e) {
+    // return null;
+    // }
+    // }
 
 }
