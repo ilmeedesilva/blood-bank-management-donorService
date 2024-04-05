@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface DonationHistoryRepository extends JpaRepository <DonationHistory, Integer> {
+public interface DonationHistoryRepository extends JpaRepository<DonationHistory, Integer> {
 
     @Query("select dh from DonationHistory dh where dh.donorNic =?1 order by date(donationDate) desc limit 1")
     Optional<DonationHistory> findDonationHistoryByNic(@Param("donorNic") String donorNic);
@@ -28,11 +28,22 @@ public interface DonationHistoryRepository extends JpaRepository <DonationHistor
     @Query("update DonationHistory dh set dh.donationDate=?1, dh.quantity=?2 where dh.donorNic=?3")
     void updateDonorByNic(Date donationDate, float quantity, String donorNic);
 
-
     @Modifying
     @Transactional
     @Query("delete from DonationHistory dh where dh.donorNic=?1 and  dh.donationDate=?2")
     void deleteDonationByNicAndDate(String donorNic, Date donationDate);
+
     @Query("select dh from DonationHistory dh where dh.donorNic=?1 and dh.donationDate=?2")
-    List<DonationHistory> getDonationHistoryByDate(String donorNic, Date donationDate);
+    List<DonationHistory> getDonationHistoryByNicAndDate(String donorNic, Date donationDate);
+
+    @Query("select dh from DonationHistory dh where dh.id=?1")
+    List<DonationHistory> getDonationHistoryById(int id);
+
+    @Query("select dh from DonationHistory dh where dh.donationDate=?1")
+    List<DonationHistory> getDonationHistoryByDate(Date donationDate);
+
+    // @Query("select dh from DonationHistory dh where dh.bloodType=?1 and
+    // dh.donationDate=?2")
+    // List<DonationHistory> getDonationsByBloodTypeAndDate(String bloodType, Date
+    // donationDate);
 }

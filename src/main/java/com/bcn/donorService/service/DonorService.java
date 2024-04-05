@@ -25,26 +25,27 @@ public class DonorService {
     @Autowired
     private DonorRepository donorRepository;
 
-//    private final RestTemplate restTemplate;
-//
-//    public DonorService(RestTemplate restTemplate) {
-//        this.restTemplate = restTemplate;
-//    }
-//
-//    public ResponseEntity<String> callStockService(String token, Donor donor, String pathParam, HttpMethod method) {
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.setBearerAuth(token);
-//        headers.setContentType(MediaType.APPLICATION_JSON);
-//        HttpEntity<Donor> requestEntity = new HttpEntity<>(donor, headers);
-//
-//        String stockUrl = "http://localhost:8083/bcn/stocks" + pathParam;
-//        try {
-//            return restTemplate.exchange(stockUrl, method, requestEntity, String.class);
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body("Error communicating with stock service");
-//        }
-//    }
+    // private final RestTemplate restTemplate;
+    //
+    // public DonorService(RestTemplate restTemplate) {
+    // this.restTemplate = restTemplate;
+    // }
+    //
+    // public ResponseEntity<String> callStockService(String token, Donor donor,
+    // String pathParam, HttpMethod method) {
+    // HttpHeaders headers = new HttpHeaders();
+    // headers.setBearerAuth(token);
+    // headers.setContentType(MediaType.APPLICATION_JSON);
+    // HttpEntity<Donor> requestEntity = new HttpEntity<>(donor, headers);
+    //
+    // String stockUrl = "http://localhost:8083/bcn/stocks" + pathParam;
+    // try {
+    // return restTemplate.exchange(stockUrl, method, requestEntity, String.class);
+    // } catch (Exception e) {
+    // return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+    // .body("Error communicating with stock service");
+    // }
+    // }
 
     public DonorRespond createDonor(Donor donor, String token) {
         DonorRespond donorRespond = new DonorRespond();
@@ -53,13 +54,15 @@ public class DonorService {
             donorRespond.setStatusMsg("Donor created successfully");
             donorRespond.setStatus(200);
 
-//            ResponseEntity<String> stockResponse = callStockService(token, donor, "/" + donor.getDonorNic(),
-//                    HttpMethod.PUT);
-//            if (stockResponse.getStatusCode() != HttpStatus.OK) {
-//                donorRespond.setStatusMsg("Failed to update stock: " + stockResponse.getBody());
-//                donorRespond.setStatus(500);
-//            }
-//            System.out.println("Stock updated with " + stockResponse);
+            // ResponseEntity<String> stockResponse = callStockService(token, donor, "/" +
+            // donor.getDonorNic(),
+            // HttpMethod.PUT);
+            // if (stockResponse.getStatusCode() != HttpStatus.OK) {
+            // donorRespond.setStatusMsg("Failed to update stock: " +
+            // stockResponse.getBody());
+            // donorRespond.setStatus(500);
+            // }
+            // System.out.println("Stock updated with " + stockResponse);
             return donorRespond;
         } catch (DataIntegrityViolationException e) {
             donorRespond.setStatusMsg("Duplicate entry: " + e.getMessage());
@@ -229,6 +232,16 @@ public class DonorService {
             return null;
         } catch (Exception e) {
             System.out.println("Error finding donor by NIC: " + e.getMessage());
+            return null;
+        }
+
+    }
+
+    public List<Donor> getDonorsByBloodType(String bloodType) {
+        try {
+            return donorRepository.getDonorsByBloodType(bloodType);
+        } catch (Exception e) {
+            System.out.println("getDonorsByBloodType ERROR : " + e.getMessage());
             return null;
         }
 
