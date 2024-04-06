@@ -120,6 +120,17 @@ public class DonationHistoryService {
         }
     }
 
+
+    public List<DonationHistory> getDonationsByDate(Date date) {
+        try {
+            return donationHistoryRepository.getDonationHistoryByDate(date);
+        } catch (Exception e) {
+            System.out.println("Failed to fetch all donation history by specific date: " + e.getMessage());
+            return null;
+        }
+    }
+
+
     public List<DonationHistory> findDonationByNic(String donorNic) {
         try {
             return donationHistoryRepository.findDonationByNic(donorNic);

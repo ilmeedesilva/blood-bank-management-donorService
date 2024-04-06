@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Date;
 import java.util.List;
 
 @RestController
@@ -30,6 +31,7 @@ public class DonationHistoryController {
         return donationHistoryService.getAllDonationHistory();
     }
 
+
     @GetMapping(path = "/donation-history/{donorNic}")
     public List<DonationHistory> findDonationByNic(@PathVariable String donorNic) {
         System.out.println("donorNic - " + donorNic);
@@ -39,6 +41,11 @@ public class DonationHistoryController {
     @GetMapping(path = "/donation-history/{donorNic}/latest")
     public DonationHistory findLatestDonation(@PathVariable String donorNic) {
         return donationHistoryService.findLatestDonation(donorNic);
+    }
+
+    @GetMapping(path = "/donation-history/date/{donationDate}")
+    public List<DonationHistory> findLatestDonation(@PathVariable Date donationDate) {
+        return donationHistoryService.getDonationsByDate(donationDate);
     }
 
     @PutMapping(path = "/donation-history")
