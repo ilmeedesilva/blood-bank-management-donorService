@@ -19,10 +19,6 @@ public class DonationHistoryController {
 
     @PostMapping(path = "/donation-history")
     public DonationHistoryRespond createDonationHistory(@RequestBody DonationHistory donationHistory, @RequestHeader("Authorization") String token) {
-        System.out.println("*********************************");
-        System.out.println("NIC - " + donationHistory.getDonorNic());
-        System.out.println("Date - " + donationHistory.getDonationDate());
-        System.out.println("Qty - " + donationHistory.getQuantity());
         return donationHistoryService.createDonationHistory(donationHistory, token);
     }
 

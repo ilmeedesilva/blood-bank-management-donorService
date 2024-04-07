@@ -37,15 +37,16 @@ public class DonationHistoryService {
         donHis.setDonorNic(donationHistory.getDonorNic());
         donHis.setDonationDate(donationHistory.getDonationDate());
         donHis.setQuantity(donationHistory.getQuantity());
+        donHis.setRecipientId(11);
+        donHis.setRecipientType("BLOOD BANK C.");
 
         List<DonationHistory> donationHistoriesList = getDonationsByNicAndDate(donationHistory.getDonorNic(),
                 donationHistory.getDonationDate());
-        System.out.println("DONOR HIS");
-        System.out.println("donationHistory.getDonorNic() - " + donHis.getDonorNic());
 
         System.out.println();
         if (donationHistoriesList.isEmpty()) {
 
+            System.out.println("no donations from donor");
             try {
                 // System.out.println("DONOR RES - " +
                 // donationHistoryRepository.findDonationHistoryByNic(donHis.getDonorNic()));
@@ -82,19 +83,21 @@ public class DonationHistoryService {
                 // }
                 //
                 // } else {
-                System.out.println("ELSE");
                 donationHistoryRepository.save(donHis);
                 donationHistoryRespond.setStatusMsg("Donation added successfully");
                 donationHistoryRespond.setStatus(200);
 
-                System.out.println(isStockExist(donHis.getDonationDate(), token));
+                System.out.println( "is stock exist ? " + isStockExist(donHis.getDonationDate(), token));
                 if (isStockExist(donHis.getDonationDate(), token)) {
-                    System.out.println("stock exist");
+                    System.out.println("stock exist, sending put request");
                     // put request
-                    SendDonationToStock(donHis, token, HttpMethod.PUT);
+//                    SendDonationToStock(donHis, token, HttpMethod.PUT);
+                    String bloodType = donorService.getDonorByNic(donHis.getDonorNic()).getBloodType();
+
+                    HandleUpdateDonationToStock(donHis.getDonorNic(), token, donHis.getDonationDate(), bloodType);
                 } else {
                     // post request
-                    System.out.println("stock does not exist");
+                    System.out.println("stock does not exist, sending post request");
                     SendDonationToStock(donHis, token, HttpMethod.POST);
                 }
 
@@ -151,10 +154,12 @@ public class DonationHistoryService {
         // System.out.println("List id: " + donationHistoriesList.get(0).getId());
         // System.out.println("donor history size :" + donationHistoriesList.size());
 
-        System.out.println("update donation token - " + token);
+        System.out.println("01 update donation");
         if (donationHistoriesList.isEmpty() || donationHistoriesList.size() == 1
                 && donationHistoriesList.get(0).getId() == donationHistory.getId()) {
             try {
+
+                System.out.println("02 update donation verified");
 
                 // DonationHistory donationHistory1 = new DonationHistory();
                 // donationHistory1.setDonationDate(donationHistory.getDonationDate());
@@ -165,8 +170,13 @@ public class DonationHistoryService {
                 Date updatedDate = donationHistory.getDonationDate();
                 String bloodType = donorService.getDonorByNic(donationHistory.getDonorNic()).getBloodType();
 
+                System.out.println("03 put donation pre data - " + dateBeforeUpdate);
+                System.out.println("04 put donation now data - " + updatedDate);
+                System.out.println("05 put donation bloodType - " + bloodType);
+
                 boolean areDatesAreSame = dateBeforeUpdate.toLocalDate().equals(updatedDate.toLocalDate());
 
+                System.out.println("06 are dates are same ? " + areDatesAreSame);
                 if (donationHistoryRepository.existsById(donationHistory.getId())) {
                     donationHistoryRepository.save(donationHistory);
                     donationHistoryRespond.setStatusMsg("Donation updated successfully");
@@ -272,38 +282,46 @@ public class DonationHistoryService {
         List<Donor> donorsWithSameBloodType = donorService.getDonorsByBloodType(bloodType);
         List<DonationHistory> donorHistoryForBloodType = new ArrayList<>();
         System.out.println(
-                "total donor count for bloodtype " + bloodType + ": " + donorsWithSameBloodType.size());
+                "08 total donor count for same bloodtype = " + bloodType + ": " + donorsWithSameBloodType.size());
         float totalQty = 0.0f;
         for (Donor eachDonor : donorsWithSameBloodType) {
+
             List<DonationHistory> donations = getDonationsByNicAndDate(eachDonor.getDonorNic(),
                     targetDate);
             donorHistoryForBloodType.addAll(donations);
         }
+        System.out.println(
+                "09 total donors history for same blood type and same date = " + bloodType + ": " + donorHistoryForBloodType.size());
         for (DonationHistory eachHistory : donorHistoryForBloodType) {
             System.out.println("each qty = " + eachHistory.getQuantity());
             totalQty += eachHistory.getQuantity();
         }
-        System.out.println("total qty of the blood type " + bloodType + ": " + totalQty);
+        System.out.println("10 total qty of the blood type " + bloodType + ": " + totalQty);
         updatedDonations.setDonationDate(targetDate);
         updatedDonations.setDonorNic(nic);
         updatedDonations.setQuantity(totalQty);
         SendDonationToStock(updatedDonations, token, HttpMethod.PUT);
     }
 
-    public void SendDonationToStock(DonationHistory Historydata, String token, HttpMethod method) {
+    public void SendDonationToStock(DonationHistory historydata, String token, HttpMethod method) {
         Donor selectedDonor = new Donor();
-        selectedDonor = donorService.getDonorByNic(Historydata.getDonorNic());
+        selectedDonor = donorService.getDonorByNic(historydata.getDonorNic());
 
         if (selectedDonor != null) {
 
-            System.out.println("selected donor blood type - " + selectedDonor.getBloodType());
+            System.out.println("SendDonationToStock donor blood type - " + selectedDonor.getBloodType());
             Stock stockItem = new Stock();
-            stockItem.setDonorNic(Historydata.getDonorNic());
-            stockItem.setDonationDate(Historydata.getDonationDate());
-            stockItem.setQuantity(Historydata.getQuantity());
+            stockItem.setDonorNic(historydata.getDonorNic());
+            stockItem.setDonationDate(historydata.getDonationDate());
+            stockItem.setQuantity(historydata.getQuantity());
             stockItem.setBloodType(selectedDonor.getBloodType());
 
-            if (Historydata.getQuantity() > 0) {
+            System.out.println("stock item nic = " + stockItem.getDonorNic());
+            System.out.println("stock item blood type  = " + stockItem.getBloodType());
+            System.out.println("stock item date = " + stockItem.getDonationDate());
+            System.out.println("stock item qty = " + stockItem.getQuantity());
+
+            if (historydata.getQuantity() > 0) {
                 ResponseEntity<String> stockResponse = null;
                 if (method == HttpMethod.PUT) {
                     System.out.println("sending put request to stock");
