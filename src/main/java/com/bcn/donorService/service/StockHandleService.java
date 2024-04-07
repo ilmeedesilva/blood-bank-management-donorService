@@ -53,6 +53,7 @@ public class StockHandleService {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
         headers.setContentType(MediaType.APPLICATION_JSON);
+        System.out.println("*****PostDataToStockService");
         HttpEntity<Stock> requestEntity = new HttpEntity<>(stockDonorItem, headers);
 
 //        String stockUrl = "http://localhost:8083/bcn" + pathParam;
@@ -69,6 +70,7 @@ public class StockHandleService {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
         headers.setContentType(MediaType.APPLICATION_JSON);
+        System.out.println("*****PutDataToStockService");
         HttpEntity<Stock> requestEntity = new HttpEntity<>(stockDonorItem, headers);
 
         String stockUrl = "http://localhost:8083/bcn/stock-items";
